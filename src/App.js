@@ -297,10 +297,10 @@ console.log('in then, after connect()-------------------------------------------
                     resolve(response.data.data.id);
                 })
                 .catch((response) => {
-                    // var error = Object.assign({}, response);
-                    // if (error.response.status === 409) {
-                    //     resolve(sessionId);
-                    // } else {
+                  
+                        resolve(sessionId);
+               
+                    // else {
                     //     console.log(error);
                     //     console.warn(
                     //         'No connection to OpenVidu Server. This may be a certificate error at ' +
