@@ -301,7 +301,7 @@ class App extends Component {
   createSession(sessionId) {
     console.log("sesionId in create Session------", sessionId);
     return new Promise((resolve, reject) => {
-      var data = { customSessionId: sessionId, recordingMode: "ALWAYS" };
+      let data = { customSessionId: sessionId, recordingMode: "ALWAYS" };
       console.log("data in create session", data);
       axios
         .post(
