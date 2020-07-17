@@ -307,12 +307,11 @@ class App extends Component {
         .post(
           OPENVIDU_SERVER_URL + "/sessions/init",
           data
-          // , {
-          //     headers: {
-          //         Authorization: 'Basic ' + btoa('OPENVIDUAPP:' + OPENVIDU_SERVER_SECRET),
-          //         'Content-Type': 'application/json',
-          //     },
-          // }
+          , {
+              headers: {
+                "Access-Control-Allow-Origin": "*"
+              },
+          }
         )
         .then((response) => {
           console.log("CREATE SESION", response);
