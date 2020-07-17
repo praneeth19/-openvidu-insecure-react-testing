@@ -283,6 +283,7 @@ console.log('in then, after connect()-------------------------------------------
         return new Promise((resolve, reject) => {
             var data = { customSessionId: sessionId,
                 recordingMode:"ALWAYS" };
+                console.log('data in create session',data);
             axios
                 .post(OPENVIDU_SERVER_URL + '/sessions/init', data
                 // , {
