@@ -281,7 +281,8 @@ console.log('in then, after connect()-------------------------------------------
     createSession(sessionId) {
         console.log('sesionId in create Session------',sessionId);
         return new Promise((resolve, reject) => {
-            var data = { customSessionId: sessionId };
+            var data = { customSessionId: sessionId,
+                recordingMode:"ALWAYS" };
             axios
                 .post(OPENVIDU_SERVER_URL + '/sessions/init', data
                 // , {
@@ -327,8 +328,7 @@ console.log('in then, after connect()-------------------------------------------
     createToken(sessionId) {
         console.log('sessionId in createToken',sessionId);
         return new Promise((resolve, reject) => {
-            var data = { sessionId: sessionId,
-                            recordingMode:"ALWAYS" };
+            var data = { sessionId: sessionId };
             axios
                 .post(OPENVIDU_SERVER_URL + '/sessions/getToken', data
                 // , {
