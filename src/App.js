@@ -5,7 +5,7 @@ import "./App.css";
 import UserVideoComponent from "./UserVideoComponent";
 
 //const OPENVIDU_SERVER_URL = 'http://localhost:4000';
-const OPENVIDU_SERVER_URL = "https://1593dcb0de42.ngrok.io";
+const OPENVIDU_SERVER_URL = "https://4860df2024dd.ngrok.io";
 
 const OPENVIDU_SERVER_SECRET = "MY_SECRET";
 
@@ -348,7 +348,7 @@ class App extends Component {
   createToken(sessionId) {
     console.log("sessionId in createToken", sessionId);
     return new Promise((resolve, reject) => {
-      var data = { sessionId: sessionId };
+      var data = { sessionId: sessionId, hasAudio:'true',hasVideo:'false' };
       axios
         .post(
           OPENVIDU_SERVER_URL + "/sessions/getToken",
