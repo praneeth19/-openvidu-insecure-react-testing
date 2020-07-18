@@ -348,7 +348,7 @@ class App extends Component {
   createToken(sessionId) {
     console.log("sessionId in createToken", sessionId);
     return new Promise((resolve, reject) => {
-      var data = { sessionId: sessionId, hasAudio:'true',hasVideo:'false' };
+      var data = { sessionId: sessionId, hasAudio:true,hasVideo:false };
       axios
         .post(
           OPENVIDU_SERVER_URL + "/sessions/getToken",
