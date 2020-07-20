@@ -372,7 +372,11 @@ class App extends Component {
 }
 
 const startRecording = async (sessionId, hasVideo, hasAudio) => {
+  
  let data = { sessionId, hasVideo, hasAudio };
+
+ console.log('in start Recording',data);
+ 
   try {
     let res = await axios.post(
       OPENVIDU_SERVER_URL + "/sessions/recording/start",
