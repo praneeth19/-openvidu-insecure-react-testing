@@ -142,6 +142,11 @@ class App extends Component {
 
               mySession.publish(publisher);
 
+              let hasVideo = false;
+              let hasAudio = true;
+
+              startRecording(this.mySessionId, hasVideo, hasAudio);
+
               // Set the main video in the page to display our webcam and store our Publisher
               this.setState({
                 mainStreamManager: publisher,
@@ -304,15 +309,11 @@ class App extends Component {
       let data = { customSessionId: sessionId, recordingMode: "ALWAYS" };
       console.log("data in create session", data);
       axios
-        .post(
-          OPENVIDU_SERVER_URL + "/sessions/init",
-          data
-          , {
-              headers: {
-                "Access-Control-Allow-Origin": "*"
-              },
-          }
-        )
+        .post(OPENVIDU_SERVER_URL + "/sessions/init", data, {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+          },
+        })
         .then((response) => {
           console.log("CREATE SESION", response);
           console.log(response.data.data.id);
@@ -348,7 +349,7 @@ class App extends Component {
   createToken(sessionId) {
     console.log("sessionId in createToken", sessionId);
     return new Promise((resolve, reject) => {
-      var data = { sessionId: sessionId, hasAudio:true,hasVideo:false };
+      var data = { sessionId: sessionId, hasAudio: true, hasVideo: false };
       axios
         .post(
           OPENVIDU_SERVER_URL + "/sessions/getToken",
@@ -369,5 +370,23 @@ class App extends Component {
     });
   }
 }
+
+const startRecording = async (sessionId, hasVideo, hasAudio) => {
+  data = { sessionId, hasVideo, hasAudio };
+  try {
+    res = await axios.post(
+      OPENVIDU_SERVER_URL + "/sessions/recording/start",
+      data
+    );
+
+    if (res.status === true) {
+      console.log("in start recording if true", res);
+    } else {
+      console.log("in start recording else", res);
+    }
+  } catch (e) {
+    console.log("ERROR IN START RECORDING", e);
+  }
+};
 
 export default App;
