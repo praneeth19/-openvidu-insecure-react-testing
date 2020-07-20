@@ -5,7 +5,7 @@ import "./App.css";
 import UserVideoComponent from "./UserVideoComponent";
 
 //const OPENVIDU_SERVER_URL = 'http://localhost:4000';
-const OPENVIDU_SERVER_URL = "https://4860df2024dd.ngrok.io";
+const OPENVIDU_SERVER_URL = "https://90aeae50dd8c.ngrok.io";
 
 const OPENVIDU_SERVER_SECRET = "MY_SECRET";
 
