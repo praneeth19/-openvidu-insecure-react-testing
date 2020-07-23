@@ -5,7 +5,7 @@ import "./App.css";
 import UserVideoComponent from "./UserVideoComponent";
 
 //const OPENVIDU_SERVER_URL = 'http://localhost:4000';
-const OPENVIDU_SERVER_URL = "https://90aeae50dd8c.ngrok.io";
+const OPENVIDU_SERVER_URL = "https://eabcba0baf0e.ngrok.io";
 
 const OPENVIDU_SERVER_SECRET = "MY_SECRET";
 
@@ -16,6 +16,7 @@ class App extends Component {
     this.state = {
       mySessionId: "SessionA",
       myUserName: "Participant" + Math.floor(Math.random() * 100),
+      recordingId:undefined, // recording id after start recording.
       session: undefined,
       mainStreamManager: undefined,
       publisher: undefined,
@@ -129,9 +130,9 @@ class App extends Component {
               // element: we will manage it on our own) and with the desired properties
               let publisher = this.OV.initPublisher(undefined, {
                 audioSource: undefined, // The source of audio. If undefined default microphone
-                videoSource: false, // The source of video. If undefined default webcam
+                videoSource: "screen", // The source of video. If undefined default webcam
                 publishAudio: true, // Whether you want to start publishing with your audio unmuted or not
-                publishVideo: false, // Whether you want to start publishing with your video enabled or not
+                publishVideo: true, // Whether you want to start publishing with your video enabled or not
                 resolution: "640x480", // The resolution of your video
                 frameRate: 30, // The frame rate of your video
                 insertMode: "APPEND", // How the video is inserted in the target element 'video-container'
@@ -145,7 +146,7 @@ class App extends Component {
               let hasVideo = false;
               let hasAudio = true;
 
-              startRecording(this.mySessionId, hasVideo, hasAudio);
+              startRecording(this.state.mySessionId, hasVideo, hasAudio);
 
               // Set the main video in the page to display our webcam and store our Publisher
               this.setState({
@@ -376,7 +377,7 @@ const startRecording = async (sessionId, hasVideo, hasAudio) => {
  let data = { sessionId, hasVideo, hasAudio };
 
  console.log('in start Recording',data);
- 
+
   try {
     let res = await axios.post(
       OPENVIDU_SERVER_URL + "/sessions/recording/start",
@@ -385,6 +386,8 @@ const startRecording = async (sessionId, hasVideo, hasAudio) => {
 
     if (res.status === true) {
       console.log("in start recording if true", res);
+      this.state.recordingId=res.data.data.id;
+      console.log('recordingId',);
     } else {
       console.log("in start recording else", res);
     }
@@ -393,4 +396,27 @@ const startRecording = async (sessionId, hasVideo, hasAudio) => {
   }
 };
 
+const stopRecording = async (recordingId) => {
+  
+  let data = { recordingId };
+ 
+  console.log('in stop Recording',data);
+ 
+   try {
+     let res = await axios.post(
+       OPENVIDU_SERVER_URL + "/sessions/recording/stop",
+       data
+     );
+ 
+     if (res.status === true) {
+       console.log("in stop recording if true", res);
+      
+     } else {
+       console.log("in stop recording else", res);
+     }
+   } catch (e) {
+     console.log("ERROR IN START RECORDING", e);
+   }
+ };
+ 
 export default App;
