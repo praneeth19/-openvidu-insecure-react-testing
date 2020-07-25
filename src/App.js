@@ -4,8 +4,8 @@ import React, { Component } from "react";
 import "./App.css";
 import UserVideoComponent from "./UserVideoComponent";
 
-//const OPENVIDU_SERVER_URL = 'http://localhost:4000';
-const OPENVIDU_SERVER_URL = "https://eabcba0baf0e.ngrok.io";
+const OPENVIDU_SERVER_URL = 'http://localhost:4000';
+//const OPENVIDU_SERVER_URL = "https://eabcba0baf0e.ngrok.io";
 
 const OPENVIDU_SERVER_SECRET = "MY_SECRET";
 
@@ -16,10 +16,13 @@ class App extends Component {
     this.state = {
       mySessionId: "SessionA",
       myUserName: "Participant" + Math.floor(Math.random() * 100),
-      recordingId:undefined, // recording id after start recording.
+      recordingId: undefined, // recording id after start recording.
       session: undefined,
       mainStreamManager: undefined,
       publisher: undefined,
+      friendEmail: "",
+      appCode: "",
+      sessionId: "",
       subscribers: [],
     };
 
@@ -29,6 +32,8 @@ class App extends Component {
     this.handleChangeUserName = this.handleChangeUserName.bind(this);
     this.handleMainVideoStream = this.handleMainVideoStream.bind(this);
     this.onbeforeunload = this.onbeforeunload.bind(this);
+    this.handleChangeFriendEmail = this.handleChangeFriendEmail.bind(this);
+    this.handleChangeAppCode = this.handleChangeAppCode.bind(this);
   }
 
   componentDidMount() {
@@ -52,6 +57,18 @@ class App extends Component {
   handleChangeUserName(e) {
     this.setState({
       myUserName: e.target.value,
+    });
+  }
+
+  handleChangeFriendEmail(e) {
+    this.setState({
+      friendEmail: e.target.value,
+    });
+  }
+
+  handleChangeAppCode(e) {
+    this.setState({
+      appCode: e.target.value,
     });
   }
 
@@ -146,7 +163,7 @@ class App extends Component {
               let hasVideo = false;
               let hasAudio = true;
 
-              startRecording(this.state.mySessionId, hasVideo, hasAudio);
+              //  startRecording(this.state.mySessionId, hasVideo, hasAudio);
 
               // Set the main video in the page to display our webcam and store our Publisher
               this.setState({
@@ -190,6 +207,8 @@ class App extends Component {
   render() {
     const mySessionId = this.state.mySessionId;
     const myUserName = this.state.myUserName;
+    const friendEmail = this.state.friendEmail;
+    const appCode = this.state.appCode;
 
     return (
       <div className="container">
@@ -205,13 +224,37 @@ class App extends Component {
               <h1> Join a video session </h1>
               <form className="form-group" onSubmit={this.joinSession}>
                 <p>
-                  <label>Participant: </label>
+                  <label>My E-mail: </label>
                   <input
                     className="form-control"
                     type="text"
                     id="userName"
                     value={myUserName}
                     onChange={this.handleChangeUserName}
+                    required
+                  />
+                </p>
+                <p>
+                  <label>Friend E-mail: </label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    id="friendName"
+                    name="friendName"
+                    value={friendEmail}
+                    onChange={this.handleChangeFriendEmail}
+                    required
+                  />
+                </p>
+                <p>
+                  <label>App code: </label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    id="appCode"
+                    name="appCode"
+                    value={appCode}
+                    onChange={this.handleChangeAppCode}
                     required
                   />
                 </p>
@@ -223,7 +266,6 @@ class App extends Component {
                     id="sessionId"
                     value={mySessionId}
                     onChange={this.handleChangeSessionId}
-                    required
                   />
                 </p>
                 <p className="text-center">
@@ -299,6 +341,7 @@ class App extends Component {
    */
 
   getToken() {
+    console.log(this.state.mySessionId);
     return this.createSession(this.state.mySessionId).then((sessionId) =>
       this.createToken(sessionId)
     );
@@ -318,9 +361,16 @@ class App extends Component {
         .then((response) => {
           console.log("CREATE SESION", response);
           console.log(response.data.data.id);
+          this.setState({
+            sessionId: response.data.data.id,
+          });
           resolve(response.data.data.id);
         })
         .catch((response) => {
+          console.log('in create session',response);
+          this.setState({
+            sessionId: sessionId,
+          });
           resolve(sessionId);
 
           // else {
@@ -373,10 +423,9 @@ class App extends Component {
 }
 
 const startRecording = async (sessionId, hasVideo, hasAudio) => {
-  
- let data = { sessionId, hasVideo, hasAudio };
+  let data = { sessionId, hasVideo, hasAudio };
 
- console.log('in start Recording',data);
+  console.log("in start Recording", data);
 
   try {
     let res = await axios.post(
@@ -386,8 +435,8 @@ const startRecording = async (sessionId, hasVideo, hasAudio) => {
 
     if (res.status === true) {
       console.log("in start recording if true", res);
-      this.state.recordingId=res.data.data.id;
-      console.log('recordingId',);
+      this.state.recordingId = res.data.data.id;
+      console.log("recordingId");
     } else {
       console.log("in start recording else", res);
     }
@@ -397,26 +446,24 @@ const startRecording = async (sessionId, hasVideo, hasAudio) => {
 };
 
 const stopRecording = async (recordingId) => {
-  
   let data = { recordingId };
- 
-  console.log('in stop Recording',data);
- 
-   try {
-     let res = await axios.post(
-       OPENVIDU_SERVER_URL + "/sessions/recording/stop",
-       data
-     );
- 
-     if (res.status === true) {
-       console.log("in stop recording if true", res);
-      
-     } else {
-       console.log("in stop recording else", res);
-     }
-   } catch (e) {
-     console.log("ERROR IN START RECORDING", e);
-   }
- };
- 
+
+  console.log("in stop Recording", data);
+
+  try {
+    let res = await axios.post(
+      OPENVIDU_SERVER_URL + "/sessions/recording/stop",
+      data
+    );
+
+    if (res.status === true) {
+      console.log("in stop recording if true", res);
+    } else {
+      console.log("in stop recording else", res);
+    }
+  } catch (e) {
+    console.log("ERROR IN START RECORDING", e);
+  }
+};
+
 export default App;
