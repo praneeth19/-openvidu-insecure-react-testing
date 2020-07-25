@@ -3,18 +3,23 @@ import { OpenVidu } from "openvidu-browser";
 import React, { Component } from "react";
 import "./App.css";
 import UserVideoComponent from "./UserVideoComponent";
+import socketIOClient from 'socket.io-client';
+const ENDPOINT = "https://57f37324288f.ngrok.io";
 
 const OPENVIDU_SERVER_URL = 'http://localhost:4000';
 //const OPENVIDU_SERVER_URL = "https://eabcba0baf0e.ngrok.io";
 
 const OPENVIDU_SERVER_SECRET = "MY_SECRET";
+let socket;
+let userSocket;
+let incomingSocket;
 
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      mySessionId: "SessionA",
+      mySessionId: "",
       myUserName: "Participant" + Math.floor(Math.random() * 100),
       recordingId: undefined, // recording id after start recording.
       session: undefined,
@@ -23,6 +28,7 @@ class App extends Component {
       friendEmail: "",
       appCode: "",
       sessionId: "",
+      socket:undefined,
       subscribers: [],
     };
 
@@ -34,10 +40,31 @@ class App extends Component {
     this.onbeforeunload = this.onbeforeunload.bind(this);
     this.handleChangeFriendEmail = this.handleChangeFriendEmail.bind(this);
     this.handleChangeAppCode = this.handleChangeAppCode.bind(this);
+    this.socketcall=this.socketcall.bind(this);
   }
 
   componentDidMount() {
     window.addEventListener("beforeunload", this.onbeforeunload);
+    socket = socketIOClient(ENDPOINT);
+    userSocket=socketIOClient(ENDPOINT+'/siggunalling');
+    incomingSocket=socketIOClient(ENDPOINT+'/incomingSocket');
+
+    userSocket.on('incoming_callcds_iBXPN1a.IaCUv0cUWI7^^^^6fd5303e-7184-469f-bccc-df5f97add91b',(data)=>{
+console.log(data);
+userSocket.emit('accept_call',{
+  caller_id:data.caller_id,
+  receiver_id:data.receiver_id,
+  psa_app_id:data.psa_app_id,
+  call_id:data.id,
+  type:data.type
+},(data1)=>{
+  console.log(data1);
+})
+    })
+    // socket = io('/webrtcPeer', {
+    //   path: '/webrtc-webapp-react',
+    //   query: {},
+    // });
   }
 
   componentWillUnmount() {
@@ -132,7 +159,7 @@ class App extends Component {
         // 'getToken' method is simulating what your server-side should do.
         // 'token' parameter should be retrieved and returned by your own backend
         this.getToken().then((token) => {
-          console.log(" in then, after getToken--------------------", token);
+          console.log(" in then, after getToken--------------------", token, this.state.sessionId,this.state.myUserName,this.state.friendEmail,this.state.appCode);
           // First param is the token got from OpenVidu Server. Second param can be retrieved by every user on event
           // 'streamCreated' (property Stream.connection.data), and will be appended to DOM as the user's nickname
           mySession
@@ -183,6 +210,17 @@ class App extends Component {
     );
   }
 
+  socketcall(){
+    console.log('came here')
+    userSocket.emit('initiate_call',{
+      caller_id:this.state.myUserName,
+      receiver_id:this.state.friendEmail,
+      psa_app_id:this.state.appCode
+    },(resp)=>{
+      console.log('in socket call',resp);
+    })
+  }
+
   leaveSession() {
     // --- 7) Leave the session by calling 'disconnect' method over the Session object ---
 
@@ -222,7 +260,7 @@ class App extends Component {
             </div>
             <div id="join-dialog" className="jumbotron vertical-center">
               <h1> Join a video session </h1>
-              <form className="form-group" onSubmit={this.joinSession}>
+              <form className="form-group" >
                 <p>
                   <label>My E-mail: </label>
                   <input
@@ -268,6 +306,7 @@ class App extends Component {
                     onChange={this.handleChangeSessionId}
                   />
                 </p>
+               
                 <p className="text-center">
                   <input
                     className="btn btn-lg btn-success"
@@ -277,6 +316,7 @@ class App extends Component {
                   />
                 </p>
               </form>
+              <button onClick={this.socketcall}> Initiate a call</button>
             </div>
           </div>
         ) : null}
