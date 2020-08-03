@@ -3,16 +3,20 @@ import { OpenVidu } from "openvidu-browser";
 import React, { Component } from "react";
 import "./App.css";
 import UserVideoComponent from "./UserVideoComponent";
-import socketIOClient from 'socket.io-client';
-const ENDPOINT = "https://57f37324288f.ngrok.io";
+import socketIOClient from "socket.io-client";
+//const ENDPOINT = "https://57f37324288f.ngrok.io";
+const ENDPOINT = "http://localhost:5759";
+const ENDPOINT1 = "http://localhost:5750";
 
-const OPENVIDU_SERVER_URL = 'http://localhost:4000';
+const OPENVIDU_SERVER_URL = "http://localhost:4000";
 //const OPENVIDU_SERVER_URL = "https://eabcba0baf0e.ngrok.io";
 
 const OPENVIDU_SERVER_SECRET = "MY_SECRET";
 let socket;
 let userSocket;
 let incomingSocket;
+let serverToken;
+let tokenio;
 
 class App extends Component {
   constructor(props) {
@@ -28,7 +32,7 @@ class App extends Component {
       friendEmail: "",
       appCode: "",
       sessionId: "",
-      socket:undefined,
+      socket: undefined,
       subscribers: [],
     };
 
@@ -40,31 +44,59 @@ class App extends Component {
     this.onbeforeunload = this.onbeforeunload.bind(this);
     this.handleChangeFriendEmail = this.handleChangeFriendEmail.bind(this);
     this.handleChangeAppCode = this.handleChangeAppCode.bind(this);
-    this.socketcall=this.socketcall.bind(this);
+    this.socketcall = this.socketcall.bind(this);
   }
+
+shouldComponentUpdate(nextProps,nextState)
 
   componentDidMount() {
     window.addEventListener("beforeunload", this.onbeforeunload);
     socket = socketIOClient(ENDPOINT);
-    userSocket=socketIOClient(ENDPOINT+'/siggunalling');
-    incomingSocket=socketIOClient(ENDPOINT+'/incomingSocket');
+    userSocket = socketIOClient(ENDPOINT + "/siggunalling");
+    incomingSocket = socketIOClient(ENDPOINT + "/incomingSocket");
+    serverToken = socketIOClient(ENDPOINT1);
+    tokenio = socketIOClient(ENDPOINT1 + "/token");
 
-    userSocket.on('incoming_callcds_iBXPN1a.IaCUv0cUWI7^^^^6fd5303e-7184-469f-bccc-df5f97add91b',(data)=>{
-console.log(data);
-userSocket.emit('accept_call',{
-  caller_id:data.caller_id,
-  receiver_id:data.receiver_id,
-  psa_app_id:data.psa_app_id,
-  call_id:data.id,
-  type:data.type
-},(data1)=>{
-  console.log(data1);
-})
-    })
-    // socket = io('/webrtcPeer', {
-    //   path: '/webrtc-webapp-react',
-    //   query: {},
+    const {myUserName,appCode} = this.state;
+
+    console.log(myUserName,appCode);
+
+    userSocket.on(
+      `incoming_callcds_iBXPN1a.IaCUv0cUWI7^^^^${appCode}`,
+      (data) => {
+        console.log(data);
+        userSocket.emit(
+          "accept_call",
+          {
+            caller_id: data.caller_id,
+            receiver_id: data.receiver_id,
+            psa_app_id: data.psa_app_id,
+            call_id: data.id,
+            type: data.type,
+          },
+          (data1) => {
+            console.log(data1);
+          }
+        );
+      }
+    );
+
+   
+
+    tokenio.on(`userId${myUserName}`, (data) => {
+      console.log("in tokenio socket");
+      console.log(data);
+    });
+
+    // tokenio.on(`userIdcds_iBXPN1a.IaCUv0cUWI7`, (data) => {
+    //   console.log("in tokenio socket");
+    //   console.log(data);
     // });
+
+    tokenio.on('example',(data)=>{
+      console.log('example.........',data);
+    });
+
   }
 
   componentWillUnmount() {
@@ -159,7 +191,14 @@ userSocket.emit('accept_call',{
         // 'getToken' method is simulating what your server-side should do.
         // 'token' parameter should be retrieved and returned by your own backend
         this.getToken().then((token) => {
-          console.log(" in then, after getToken--------------------", token, this.state.sessionId,this.state.myUserName,this.state.friendEmail,this.state.appCode);
+          console.log(
+            " in then, after getToken--------------------",
+            token,
+            this.state.sessionId,
+            this.state.myUserName,
+            this.state.friendEmail,
+            this.state.appCode
+          );
           // First param is the token got from OpenVidu Server. Second param can be retrieved by every user on event
           // 'streamCreated' (property Stream.connection.data), and will be appended to DOM as the user's nickname
           mySession
@@ -210,15 +249,19 @@ userSocket.emit('accept_call',{
     );
   }
 
-  socketcall(){
-    console.log('came here')
-    userSocket.emit('initiate_call',{
-      caller_id:this.state.myUserName,
-      receiver_id:this.state.friendEmail,
-      psa_app_id:this.state.appCode
-    },(resp)=>{
-      console.log('in socket call',resp);
-    })
+  socketcall() {
+    console.log("came here");
+    userSocket.emit(
+      "initiate_call",
+      {
+        caller_id: this.state.myUserName,
+        receiver_id: this.state.friendEmail,
+        psa_app_id: this.state.appCode,
+      },
+      (resp) => {
+        console.log("in socket call", resp);
+      }
+    );
   }
 
   leaveSession() {
@@ -260,7 +303,7 @@ userSocket.emit('accept_call',{
             </div>
             <div id="join-dialog" className="jumbotron vertical-center">
               <h1> Join a video session </h1>
-              <form className="form-group" >
+              <form className="form-group">
                 <p>
                   <label>My E-mail: </label>
                   <input
@@ -306,7 +349,7 @@ userSocket.emit('accept_call',{
                     onChange={this.handleChangeSessionId}
                   />
                 </p>
-               
+
                 <p className="text-center">
                   <input
                     className="btn btn-lg btn-success"
@@ -407,7 +450,7 @@ userSocket.emit('accept_call',{
           resolve(response.data.data.id);
         })
         .catch((response) => {
-          console.log('in create session',response);
+          console.log("in create session", response);
           this.setState({
             sessionId: sessionId,
           });
