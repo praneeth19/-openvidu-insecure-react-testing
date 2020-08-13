@@ -8,8 +8,8 @@ import socketIOClient from "socket.io-client";
 const ENDPOINT = "http://localhost:5759";
 const ENDPOINT1 = "http://localhost:5750";
 
-const OPENVIDU_SERVER_URL = "http://localhost:4000";
-//const OPENVIDU_SERVER_URL = "https://eabcba0baf0e.ngrok.io";
+//const OPENVIDU_SERVER_URL = "http://localhost:4000";
+const OPENVIDU_SERVER_URL = " https://cf1468b52395.ngrok.io";
 
 const OPENVIDU_SERVER_SECRET = "MY_SECRET";
 let socket;
@@ -47,7 +47,9 @@ class App extends Component {
     this.socketcall = this.socketcall.bind(this);
   }
 
-shouldComponentUpdate(nextProps,nextState)
+// shouldComponentUpdate(nextProps,nextState){
+
+// }
 
   componentDidMount() {
     window.addEventListener("beforeunload", this.onbeforeunload);
@@ -62,7 +64,7 @@ shouldComponentUpdate(nextProps,nextState)
     console.log(myUserName,appCode);
 
     userSocket.on(
-      `incoming_callcds_iBXPN1a.IaCUv0cUWI7^^^^${appCode}`,
+      `incoming_callcds_iBXPN1a.IaCUv0cUWI7^^^^6fd5303e-7184-469f-bccc-df5f97add91b`,
       (data) => {
         console.log(data);
         userSocket.emit(
@@ -83,15 +85,15 @@ shouldComponentUpdate(nextProps,nextState)
 
    
 
-    tokenio.on(`userId${myUserName}`, (data) => {
-      console.log("in tokenio socket");
-      console.log(data);
-    });
-
-    // tokenio.on(`userIdcds_iBXPN1a.IaCUv0cUWI7`, (data) => {
+    // tokenio.on(`userId${myUserName}`, (data) => {
     //   console.log("in tokenio socket");
     //   console.log(data);
     // });
+
+    tokenio.on(`userIdcds_iBXPN1a.IaCUv0cUWI7`, (data) => {
+      console.log("in tokenio socket");
+      console.log(data);
+    });
 
     tokenio.on('example',(data)=>{
       console.log('example.........',data);
